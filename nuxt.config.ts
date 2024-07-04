@@ -7,10 +7,14 @@ export default defineNuxtConfig({
     '@pinia-plugin-persistedstate/nuxt',
     "@nuxt/ui",
     "@nuxt/icon"
-  ], postcss: {
+  ],
+  postcss: {
     plugins: {
       tailwindcss: {},
       autoprefixer: {},
     },
-  }
+  },
+  plugins: [
+    { src: '~/plugins/vue3-toastify.js', mode: 'client' }
+  ],
 })

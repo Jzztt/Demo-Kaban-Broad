@@ -1,182 +1,61 @@
 
 <script setup>
-import draggable from "vuedraggable";
 import { z } from "zod";
+import draggable from "vuedraggable";
+import { toast } from "vue3-toastify";
+import { KanbanBroadServices } from "~/services/kanbanBroadServices";
 
 const lanes = ref([]);
+const ticketId = ref(null);
 const showCard = ref(false);
-const levelOptions = ["Low Level", "Medium Level", "High Level"];
+const priorityOptions = ["Low", "Medium", "High"];
 
 const state = reactive({
   title: "",
   description: "",
-  linkIssue: "",
-  level: levelOptions[0],
+  link_issue: "",
+  priority: priorityOptions[0],
 });
 
 const isEditing = reactive({
   value: false,
-  ticketIndex: null,
-  laneIndex: null,
+  ticketId: null,
+  laneId: null,
 });
 
 const TicketSchema = z.object({
   title: z.string().min(8, "Must be at least 8 characters"),
   description: z.string().min(8, "Must be at least 8 characters"),
-  linkIssue: z.string().min(8, "Must be at least 8 characters"),
-  level: z.enum(levelOptions),
+  link_issue: z.string().min(8, "Must be at least 8 characters"),
+  priority: z.enum(priorityOptions),
 });
 
-const loadTasks = () => {
-  const savedTasks = localStorage.getItem("tasks");
-  if (savedTasks) {
-    lanes.value = JSON.parse(savedTasks);
-  } else {
-    lanes.value = [
-      {
-        name: "To Do",
-        tickets: [
-          {
-            title:
-              "We don't have a brig. Meh. Calculon is gonna kill us and it's all everybody else's fault!",
-            author: "Philip J. Fry",
-            created_at: "16 hours ago",
-            level: "Medium Level",
-            comments_count: 12,
-          },
-          {
-            title:
-              "This opera's as lousy as it is brilliant! Your lyrics lack subtlety. You can't just have your characters announce how they feel.",
-            author: "Turanga Leela",
-            created_at: "16 hours ago",
-            level: "High Level",
-            comments_count: 1,
-          },
-          {
-            title:
-              "Stop it, stop it. It's fine. I will 'destroy' you! I can explain. It's very valuable. ",
-            author: "Bender Bending Rodriguez",
-            created_at: "16 hours ago",
-            level: "Low Level",
-            comments_count: 12,
-          },
-          {
-            title:
-              "Hey, whatcha watching? Hey! I'm a porno-dealing monster, what do I care what you think? It must be wonderful.",
-            author: "Professor Farnsworth",
-            created_at: "16 hours ago",
-            level: "Medium Level",
-            comments_count: 0,
-          },
-          {
-            title:
-              "A superpowers drug you can just rub onto your skin? You'd think it would be something you'd have to freebase.",
-            author: "Amy Wong",
-            created_at: "16 hours ago",
-            level: "High Level",
-            comments_count: 56,
-          },
-          {
-            title:
-              "Robot 1-X, save my friends! And Zoidberg! Perhaps, but perhaps your civilization is merely the sewer of an even greater society above you!",
-            author: "Hermes Conrad",
-            created_at: "16 hours ago",
-            level: "Medium Level",
-            comments_count: 10,
-          },
-          {
-            title:
-              "You are the last hope of the universe. Stop! Don't shoot fire stick in space canoe!",
-            author: "Dr. John A. Zoidberg",
-            created_at: "16 hours ago",
-            level: "Low Level",
-            comments_count: 3,
-          },
-        ],
-      },
-      {
-        name: "In Progress",
-        tickets: [
-          {
-            title:
-              "You are the last hope of the universe. Stop! Don't shoot fire stick in space canoe!",
-            author: "Dr. John A. Zoidberg",
-            created_at: "16 hours ago",
-            level: "Low Level",
-            comments_count: 12,
-          },
-          {
-            title:
-              "A superpowers drug you can just rub onto your skin? You'd think it would be something you'd have to freebase.",
-            author: "Amy Wong",
-            created_at: "16 hours ago",
-            level: "High Level",
-            comments_count: 2,
-          },
-          {
-            title:
-              "This opera's as lousy as it is brilliant! Your lyrics lack subtlety. You can't just have your characters announce how they feel.",
-            author: "Turanga Leela",
-            created_at: "16 hours ago",
-            level: "High Level",
-            comments_count: 12,
-          },
-        ],
-      },
-      {
-        name: "Done",
-        tickets: [
-          {
-            title: "Demo",
-            author: "hienlv12",
-            created_at: "16 hours ago",
-            level: "Low Level",
-            comments_count: 12,
-          },
-          {
-            title:
-              "Stop it, stop it. It's fine. I will 'destroy' you! I can explain. It's very valuable. ",
-            author: "Bender Bending Rodriguez",
-            created_at: "16 hours ago",
-            level: "Low Level",
-            comments_count: 12,
-          },
-          {
-            title:
-              "Hey, whatcha watching? Hey! I'm a porno-dealing monster, what do I care what you think? It must be wonderful.",
-            author: "Professor Farnsworth",
-            created_at: "16 hours ago",
-            level: "Medium Level",
-            comments_count: 0,
-          },
-          {
-            title:
-              "We don't have a brig. Meh. Calculon is gonna kill us and it's all everybody else's fault!",
-            author: "Philip J. Fry",
-            created_at: "16 hours ago",
-            level: "Medium Level",
-            comments_count: 12,
-          },
-          {
-            title:
-              "This opera's as lousy as it is brilliant! Your lyrics lack subtlety. You can't just have your characters announce how they feel.",
-            author: "Turanga Leela",
-            created_at: "16 hours ago",
-            level: "High Level",
-            comments_count: 1,
-          },
-        ],
-      },
-    ];
+const onStart = async (event) => {
+  ticketId.value = Number(event.item.dataset.ticketId);
+};
+
+const onEnd = async (event) => {
+  const oldIndexTicket = event.oldIndex;
+  const newIndexTicket = event.newIndex;
+  const fromLaneId = event.from.dataset.laneId;
+  const toLaneId = event.to.dataset.laneId;
+  // const ticketId = event.item.dataset.ticketId;
+  const payload = {
+    oldIndex: oldIndexTicket,
+    newIndex: newIndexTicket,
+    fromLaneId: Number(fromLaneId),
+    toLaneId: Number(toLaneId),
+    ticketId: ticketId.value,
+  };
+  if (toLaneId == fromLaneId && oldIndexTicket == newIndexTicket) {
+    toast.warning("Ticket not moved");
+    return;
   }
-};
-
-const saveTasks = () => {
-  localStorage.setItem("tasks", JSON.stringify(lanes.value));
-};
-
-const onEnd = () => {
-  saveTasks();
+  const moveTicketResponse = await KanbanBroadServices.moveTicket(payload);
+  if (!moveTicketResponse.success || !moveTicketResponse.data) {
+    toast.error("Error moving ticket");
+  }
+  toast.success("Ticket moved successfully");
 };
 
 const dragOptions = computed(() => {
@@ -201,40 +80,71 @@ const validate = (state) => {
   }
 };
 
-const handleShowCard = (payload, laneIndex, ticketIndex) => {
+const handleShowCard = (payload, laneId) => {
   showCard.value = true;
   if (payload) {
-    isEditing.laneIndex = laneIndex;
+    isEditing.laneId = laneId;
     isEditing.value = true;
-    isEditing.ticketIndex = ticketIndex;
+    isEditing.ticketId = payload.id;
     state.title = payload.title;
     state.description = payload.description;
-    state.linkIssue = payload.linkIssue;
-    state.level = payload.level;
+    state.link_issue = payload.link_issue;
+    state.priority = payload.priority;
   }
 };
-const handleDelete = (landIndex, ticketIndex) => {
-  lanes.value[landIndex].tickets.splice(ticketIndex, 1);
-  saveTasks();
+const handleDelete = async (laneId, ticketId) => {
+  const deleteTicketResponse = await KanbanBroadServices.deleteTicket(
+    laneId,
+    ticketId
+  );
+  if (!deleteTicketResponse.success || !deleteTicketResponse.data) {
+    toast.error("Error deleting ticket");
+  }
+  lanes.value = deleteTicketResponse.data;
+  toast.success("Ticket deleted successfully");
 };
 
 async function onSubmit(event) {
+  const payload = event.data;
+  let response;
   if (isEditing.value) {
-    // Update the existing ticket
-    lanes.value[isEditing.laneIndex].tickets[isEditing.ticketIndex] = {
-      ...event.data,
-    };
+    const updateTicketResponse = await KanbanBroadServices.updateTicket(
+      isEditing.laneId,
+      isEditing.ticketId,
+      payload
+    );
+    if (!updateTicketResponse.success || !updateTicketResponse.data) {
+      toast.error("Error updating ticket");
+    }
+    response = updateTicketResponse.data;
+    toast.success("Ticket updated successfully");
   } else {
-    lanes.value[0].tickets.push(event.data);
+    const createTicketResponse = await KanbanBroadServices.createTicket(
+      payload
+    );
+    if (!createTicketResponse.success || !createTicketResponse.data) {
+      toast.error("Error creating ticket");
+    }
+    response = createTicketResponse.data;
+    toast.success("Ticket created successfully");
   }
 
   showCard.value = false;
+  state.title = "";
+  state.description = "";
+  state.link_issue = "";
+  state.priority = priorityOptions[0];
   isEditing.value = false;
-  saveTasks();
+  lanes.value = response;
 }
 
+const fetchLanes = async () => {
+  const lanesResponse = await KanbanBroadServices.getLanes();
+  lanes.value = lanesResponse.data;
+};
+
 onMounted(() => {
-  loadTasks();
+  fetchLanes();
 });
 </script>
 
@@ -268,12 +178,12 @@ onMounted(() => {
                 <UTextarea v-model="state.description" type="text" />
               </UFormGroup>
 
-              <UFormGroup label="Link Issue" name="linkIssue">
-                <UInput v-model="state.linkIssue" type="text" />
+              <UFormGroup label="Link Issue" name="link_issue">
+                <UInput v-model="state.link_issue" type="text" />
               </UFormGroup>
 
-              <UFormGroup label="Level Issue" name="levelIssue">
-                <USelect v-model="state.level" :options="levelOptions" />
+              <UFormGroup label="Priority Issue" name="priorityIssue">
+                <USelect v-model="state.priority" :options="priorityOptions" />
               </UFormGroup>
 
               <UButton type="submit"> Submit </UButton>
@@ -285,7 +195,7 @@ onMounted(() => {
   </div>
   <div class="grid grid-cols-3 gap-6">
     <div
-      v-for="(lane, laneIndex) in lanes"
+      v-for="lane in lanes"
       :key="lane.name"
       class="border border-gray-300 rounded-md bg-gray-50"
     >
@@ -312,19 +222,21 @@ onMounted(() => {
           class="min-h-full"
           v-model="lane.tickets"
           group="tickets"
-          @start="drag = true"
+          @start="onStart"
           @end="onEnd"
           item-key="name"
           v-bind="dragOptions"
+          :data-lane-id="lane.id"
         >
-          <template #item="{ element, index }">
-            <Ticket
-              :handleDelete="handleDelete"
-              :handelShowOrUpdateCard="handleShowCard"
-              :ticket="element"
-              :laneIndex="laneIndex"
-              :index="index"
-            />
+          <template #item="{ element }">
+            <div :data-ticket-id="element.id">
+              <Ticket
+                :handleDelete="handleDelete"
+                :handelShowOrUpdateCard="handleShowCard"
+                :ticket="element"
+                :laneId="lane.id"
+              />
+            </div>
           </template>
         </draggable>
       </div>

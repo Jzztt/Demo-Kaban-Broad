@@ -2,14 +2,13 @@
 import { EllipsisVertical, Trash2, Pencil } from "lucide-vue-next";
 const props = defineProps({
   ticket: Object,
-  ticketIndex: Number,
-  laneIndex: Number,
+  laneId: Number,
   handelShowOrUpdateCard: Function,
   handleDelete: Function
 });
 const handleDelete = (event) => {
   event.stopPropagation();
-  props.handleDelete( props.laneIndex, props.ticketIndex);
+  props.handleDelete( props.laneId, props.ticket.id);
 
 };
 </script>
@@ -45,24 +44,24 @@ const handleDelete = (event) => {
 
       <div class="flex gap-2">
         <div
-          v-if="ticket.level == 'Low Level'"
+          v-if="ticket.priority == 'Low'"
           class="px-3 text-sm font-semibold text-green-700 bg-green-100 rounded-full top-4 right-4"
         >
-          {{ ticket.level }}
+          {{ ticket.priority }} Level
         </div>
         <div
-          v-if="ticket.level == 'Medium Level'"
+          v-if="ticket.priority == 'Medium'"
           class="px-3 text-sm font-semibold text-yellow-700 bg-yellow-100 rounded-full top-4 right-4"
         >
-          {{ ticket.level }}
+          {{ ticket.priority }} Level
         </div>
         <div
-          v-if="ticket.level == 'Hight Level'"
+          v-if="ticket.priority == 'High'"
           class="px-3 text-sm font-semibold text-red-700 bg-red-100 rounded-full top-4 right-4"
         >
-          {{ ticket.level }}
+          {{ ticket.priority }} Level
         </div>
-        <div @click="handleDelete">
+        <div>
           <UPopover>
             <EllipsisVertical />
 
@@ -73,7 +72,7 @@ const handleDelete = (event) => {
                 /></UButton>
                 <UButton
                   @click="
-                    handelShowOrUpdateCard(ticket, laneIndex, ticketIndex)
+                    handelShowOrUpdateCard(ticket,laneId)
                   "
                   ><Pencil class="w-4 h-4"
                 /></UButton>
