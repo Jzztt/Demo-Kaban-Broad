@@ -17,4 +17,5 @@ export default defineNuxtConfig({
   plugins: [
     { src: '~/plugins/vue3-toastify.js', mode: 'client' }
   ],
+
 })
