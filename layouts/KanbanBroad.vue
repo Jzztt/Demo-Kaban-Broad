@@ -4,13 +4,14 @@ import { z } from "zod";
 import draggable from "vuedraggable";
 import { toast } from "vue3-toastify";
 import { KanbanBroadServices } from "~/services/kanbanBroadServices";
+import { useNuxtApp } from "#app";
 
 const props = defineProps({
   token: {
     type: String,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
 const lanes = ref([]);
 const ticketId = ref(null);
@@ -152,6 +153,18 @@ const fetchLanes = async () => {
 
 onMounted(() => {
   fetchLanes();
+
+  // const { $echo } = useNuxtApp();
+  // console.log($echo);
+
+  // $echo.channel("tickets").listen("TicketMoved", (e) => {
+  //   console.log("Ticket moved:", e.ticket);
+  // });
+
+  window.Echo.channel("tickets").listen("TicketMoved", (e) => {
+    console.log("Ticket moved:", e.ticket);
+    toast.success("Ticket moved successfully");
+  });
 });
 </script>
 
