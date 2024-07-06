@@ -1,19 +1,26 @@
 <script setup>
 import { RegisterSchema } from "~/schemas/Register.schema";
 import { AuthServices } from "~/services/auth";
+
+definePageMeta({
+  auth: false,
+})
 const formState = reactive({
   name: undefined,
   email: undefined,
   password: undefined,
 });
+const isLoading = ref(false);
 
 const handleRegister = async (event) => {
+  isLoading.value = true;
   const payload = event.data;
   const registerResponse = await AuthServices.register(payload);
   if (!registerResponse.success || !registerResponse.data) {
     toast.error("Error registering user");
     return;
   }
+  isLoading.value = false;
   useRouter().push({ name: "auth-login" });
 };
 </script>

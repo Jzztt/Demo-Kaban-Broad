@@ -5,6 +5,13 @@ import draggable from "vuedraggable";
 import { toast } from "vue3-toastify";
 import { KanbanBroadServices } from "~/services/kanbanBroadServices";
 
+const props = defineProps({
+  token: {
+    type: String,
+    required: true
+  }
+})
+
 const lanes = ref([]);
 const ticketId = ref(null);
 const showCard = ref(false);
@@ -139,7 +146,7 @@ async function onSubmit(event) {
 }
 
 const fetchLanes = async () => {
-  const lanesResponse = await KanbanBroadServices.getLanes();
+  const lanesResponse = await KanbanBroadServices.getLanes(props.token);
   lanes.value = lanesResponse.data;
 };
 

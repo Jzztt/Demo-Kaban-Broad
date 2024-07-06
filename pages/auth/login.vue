@@ -1,8 +1,21 @@
 
 <script setup>
+definePageMeta({
+  title: "Login",
+  layout: "empty",
+  public: true,
+  auth: {
+    unauthenticatedOnly: true,
+    navigateAuthenticatedTo: "/",
+  },
+});
 import { toast } from "vue3-toastify";
 import { LoginSchema } from "~/schemas/Login.schema";
 import { AuthServices } from "~/services/auth";
+
+const { signIn } = useAuth();
+
+const isLoading = ref(false);
 
 const formState = reactive({
   email: undefined,
@@ -10,16 +23,17 @@ const formState = reactive({
 });
 
 const handleLogin = async (event) => {
-  const payload = event.data;
-  const loginResponse = await AuthServices.login(payload);
-  if (!loginResponse.success || !loginResponse.access_token) {
-    toast.error("Error logging in");
-    return;
+  isLoading.value = true;
+  const { signIn} = useAuth();
+
+  try {
+    await signIn({ ...event.data }, { callbackUrl: "/" });
+    isLoading.value = false;
+  } catch (error) {
+    console.error("Login failed:", error);
+    isLoading.value = false;
   }
-  const token = loginResponse.access_token;
-  localStorage.setItem("access_token", token);
-  useRouter().push({ path: "/" });
-};
+}
 </script>
 <template>
   <WrapperAuth title="Login to your account">
@@ -53,7 +67,9 @@ const handleLogin = async (event) => {
         />
       </UFormGroup>
 
-      <UButton block type="submit" class="w-full my-2 " :loading="isLoading">Login</UButton>
+      <UButton block type="submit" class="w-full my-2" :loading="isLoading"
+        >Login</UButton
+      >
     </UForm>
   </WrapperAuth>
 </template>

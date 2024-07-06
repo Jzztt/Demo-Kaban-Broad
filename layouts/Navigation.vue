@@ -1,4 +1,12 @@
 <script setup>
+
+const props = defineProps({
+  userName: {
+    type: String,
+    required: true
+  }
+})
+
 const dropdownItems = ref([
   [
     {
@@ -115,10 +123,10 @@ async function handleSignOut() {
             >
 
             <template #profile>
-              <div class="text-left">
+              <div class="flex gap-3 text-left">
                 <p>Signed in as</p>
                 <p class="font-medium text-gray-900 truncate dark:text-white">
-                  <!-- {{ data?.user?.email }} -->
+                  {{ props.userName }}
                 </p>
               </div>
             </template>

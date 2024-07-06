@@ -6,18 +6,8 @@ const axiosInstance = axios.create({
   baseURL,
   headers: {
     'Content-Type': 'application/json',
-
+    'Authorization': `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiMjFhMGE5ZmZjMDI0ODU3MzlkN2U4MTYyMDkwNDZmZDRjMjEyY2Q4NTcxNzcwNjJhZTExMTVjM2QxZWMxNDQ2YTA2OGM1NWNlMTc1ODI4MWUiLCJpYXQiOjE3MjAxNzY3NDIuODkyNTkzLCJuYmYiOjE3MjAxNzY3NDIuODkyNTk2LCJleHAiOjE3MzYwNzQzNDIuODgyNDI0LCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.ZZ3Z75qKvVV1Cr_5d1Tz4uBz72ZJ1CC85_01hOEeyGKYDNQbDX35hHThzOBSsocyexcSZBuvDjxZuN7rLCYWRnLJ1dMnu3YMMPfF2Zj7tiCQRi1Ya1jTKN-HUFamZWvylG-6_Oqzpckk2kk5tAIwlx5pCmnUELLiqkxkhbWL6tUYlsd1vSca1ZMxoigy8sAvbB_RsbE4NTdzRYsDSVoOXMHg4OEq2AABBVQsuFfC1ovyiAfnn0p_tQVlnoNvG2gfCRNb5XqyZCz3iRPza-Zd9SuPBLG_7odU6Dk1I1HmE5tWnQDrA135jqa44VNrqvkUunde6vcgsWaHS6bGDZQkX2w18BXD6SRA1SfK9LY7NCwiwdK_eA2bn1Xy8UdRZGro-HnMs4G_X2cs2fARgrQPP57VNQ9gQgExwNe_SN9hxEn3uH9VfNzgcaJxLADFtdCKnmZpU-llqoSpYxWS-jQli50jX5wZEVAJysFO-UXvAtutCqgMHrby9jXFlxTLRYwFPaNJ6WkfONOnYlcJwKogmgxAanJhbgYWqyLMcMFujW4G3MYZA3CGb9Rl31_xXoCTisM59yDIkf2SBkk9p7qzxfahGSw1De9CP1e9hoOIdmPWKCMYywNqN1YtGIkUIGVes3d4MYHmtaUrRMjq_rlACLUnY-PBJlX7RjNbLNcN5k0`,
   },
 });
 
-
-axiosInstance.interceptors.request.use(config => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, error => {
-  return Promise.reject(error);
-});
 export default axiosInstance;

@@ -1,8 +1,8 @@
 import axiosInstance from "~/ultis/apiService";
 
-export const getLanes = async () => {
+export const getLanes = async ( token) => {
   try {
-    const { data } = await axiosInstance.get("/lanes");
+    const { data } = await axiosInstance.get("/lanes", { headers: { Authorization: token } });
     return data;
   } catch (error) {
     console.log(error);
